@@ -19,7 +19,7 @@ async def main():
         
         close_button = page.get_by_role("button", name="Close")
         try:
-            await close_button.wait_for(state="visible", timeout=5000)
+            await close_button.wait_for(state="visible", timeout=2000)
             if await close_button.is_visible():
                 await close_button.click()
                 await page.locator("div").filter(has_text=re.compile(r"^All$")).first.click()
