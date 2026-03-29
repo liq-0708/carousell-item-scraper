@@ -15,7 +15,7 @@ async def click_button(button:Locator):
 
 async def main():
     async with Stealth().use_async(async_playwright()) as p:
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         await page.route("**/*.{png,jpg,jpeg,svg,gif}", lambda route: route.abort())
         await page.goto("https://www.carousell.com.my/")
