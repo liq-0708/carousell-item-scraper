@@ -1,12 +1,21 @@
 import re
-
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Locator
 from playwright_stealth import Stealth
 import asyncio, csv
 from pathlib import Path
+
+async def click_button(button:Locator):
+    try:
+        await button.wait_for(state="visible", timeout=2000)
+        if await button.is_visible():
+            await button.click()
+    except Exception:
+        pass
+    
+
 async def main():
     async with Stealth().use_async(async_playwright()) as p:
-        browser = await p.chromium.launch(headless=True)
+        browser = await p.chromium.launch(headless=False)
         page = await browser.new_page()
         await page.route("**/*.{png,jpg,jpeg,svg,gif}", lambda route: route.abort())
         await page.goto("https://www.carousell.com.my/")
@@ -18,24 +27,16 @@ async def main():
         await search_box.press("Enter")
         
         close_button = page.get_by_role("button", name="Close")
-        try:
-            await close_button.wait_for(state="visible", timeout=2000)
-            if await close_button.is_visible():
-                await close_button.click()
-                await page.locator("div").filter(has_text=re.compile(r"^All$")).first.click()
-        except Exception:
-            pass
+        await click_button(close_button)
+        all_button = page.locator("div").filter(has_text=re.compile(r"^All$")).first
+        await click_button(all_button)
         
         #press_see_more_button
         Next_button = page.get_by_role("button", name="Next")
         Continue_browsing = page.get_by_role("button", name="Continue browsing")
-        await Next_button.wait_for(state="visible", timeout=5000)
-        await Next_button.click()
-        await page.wait_for_timeout(1000)
-        await Next_button.click()
-        await page.wait_for_timeout(1000)
-        await Continue_browsing.click()
-        
+        await click_button(Next_button)
+        await click_button(Next_button)
+        await click_button(Continue_browsing)
         while True:
             see_more_button = page.get_by_role("button", name="Show more results")
             try:
